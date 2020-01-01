@@ -4,16 +4,17 @@
 # 
 #
 
-Name:           linux
+Name:           linux-surface
 Version:        5.4.6
 Release:        883
 License:        GPL-2.0
-Summary:        The Linux kernel
-Url:            http://www.kernel.org/
+Summary:        The Linux kernel patched with linux-surface project patches
+Url:            https://github.com/linux-surface/linux-surface
 Group:          kernel
 Source0:        https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.6.tar.xz
 Source1:        config
 Source2:        cmdline
+Source3:        https://github.com/linux-surface/linux-surface/archive/v5.4.6-1.tar.gz
 
 %define ktarget  native
 %define kversion %{version}-%{release}.%{ktarget}
@@ -90,6 +91,16 @@ Patch0131: 0131-nvme-workaround.patch
 #Serie1.tag  0.0.20191219
 Patch1001: 1001-WireGuard-fast-modern-secure-kernel-VPN-tunnel.patch
 #Serie1.end
+
+#surface.start 200X linux-surface patches
+Patch2001: 2001-ioremap_uc.patch
+Patch2002: 2002-hid.patch
+Patch2003: 2003-surface-acpi.patch
+Patch2004: 2004-surface3-power.patch
+Patch2005: 2005-surface-lte.patch
+Patch2006: 2006-wifi.patch
+Patch2007: 2007-surface3-spi-dma.patch
+#surface.end
 
 %description
 The Linux kernel.
@@ -190,6 +201,16 @@ Linux kernel build files
 #Serie1.patch.start
 %patch1001 -p1
 #Serie1.patch.end
+
+#surface.patch.start
+%patch2001 -p1
+%patch2002 -p1
+%patch2003 -p1
+%patch2004 -p1
+%patch2005 -p1
+%patch2006 -p1
+%patch2007 -p1
+#surface.patch.end
 
 cp %{SOURCE1} .
 
