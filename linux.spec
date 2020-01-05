@@ -16,7 +16,7 @@ Source1:        config
 Source2:        cmdline
 Source3:        https://github.com/linux-surface/linux-surface/archive/v5.4.6-1.tar.gz
 
-%define ktarget  native
+%define ktarget  surface
 %define kversion %{version}-%{release}.%{ktarget}
 
 BuildRequires:  buildreq-kernel
