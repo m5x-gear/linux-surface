@@ -6,7 +6,7 @@
 
 Name:           linux-surface
 Version:        5.4.6
-Release:        883
+Release:        1
 License:        GPL-2.0
 Summary:        The Linux kernel patched with linux-surface project patches
 Url:            https://github.com/linux-surface/linux-surface
@@ -23,7 +23,7 @@ BuildRequires:  buildreq-kernel
 
 Requires: systemd-bin
 Requires: init-rdahead-extras
-Requires: linux-license = %{version}-%{release}
+Requires: linux-surface-license = %{version}-%{release}
 
 # don't strip .ko files!
 %global __os_install_post %{nil}
@@ -109,7 +109,7 @@ The Linux kernel.
 License:        GPL-2.0
 Summary:        The Linux kernel extra files
 Group:          kernel
-Requires:       linux-license = %{version}-%{release}
+Requires:       linux-surface-license = %{version}-%{release}
 
 %description extra
 Linux kernel extra files
@@ -133,9 +133,9 @@ Creates a cpio file with some modules
 License:        GPL-2.0
 Summary:        The Linux kernel
 Group:          kernel
-Requires:       linux = %{version}-%{release}
-Requires:       linux-extra = %{version}-%{release}
-Requires:       linux-license = %{version}-%{release}
+Requires:       linux-surface = %{version}-%{release}
+Requires:       linux-surface-extra = %{version}-%{release}
+Requires:       linux-surface-license = %{version}-%{release}
 
 %description dev
 Linux kernel build files
@@ -311,9 +311,9 @@ createCPIO %{ktarget} %{kversion}
 
 rm -rf %{buildroot}/usr/lib/firmware
 
-mkdir -p %{buildroot}/usr/share/package-licenses/linux
-cp COPYING %{buildroot}/usr/share/package-licenses/linux/COPYING
-cp -a LICENSES/* %{buildroot}/usr/share/package-licenses/linux
+mkdir -p %{buildroot}/usr/share/package-licenses/linux-surface
+cp COPYING %{buildroot}/usr/share/package-licenses/linux-surface/COPYING
+cp -a LICENSES/* %{buildroot}/usr/share/package-licenses/linux-surface
 
 %files
 %dir /usr/lib/kernel
@@ -332,7 +332,7 @@ cp -a LICENSES/* %{buildroot}/usr/share/package-licenses/linux
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/linux
+/usr/share/package-licenses/linux-surface
 
 %files cpio
 /usr/lib/kernel/initrd-org.clearlinux.%{ktarget}.%{version}-%{release}
