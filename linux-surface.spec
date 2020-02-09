@@ -5,16 +5,16 @@
 #
 
 Name:           linux-surface
-Version:        5.4.6
-Release:        1
+Version:        5.4.18
+Release:        902
 License:        GPL-2.0
 Summary:        The Linux kernel patched with linux-surface project patches
 Url:            https://github.com/linux-surface/linux-surface
 Group:          kernel
-Source0:        https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.6.tar.xz
+Source0:        https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.18.tar.xz
 Source1:        config
 Source2:        cmdline
-Source3:        https://github.com/linux-surface/linux-surface/archive/v5.4.6-1.tar.gz
+Source3:        https://github.com/linux-surface/linux-surface/commits/ffe19063f7c6469d4a625e72793e26a9f5ad3d5c
 
 %define ktarget  surface
 %define kversion %{version}-%{release}.%{ktarget}
@@ -31,24 +31,15 @@ Requires: linux-surface-license = %{version}-%{release}
 %define __strip /bin/true
 
 #cve.start cve patches from 0001 to 050
-Patch0001: CVE-2019-12379.patch
-Patch0002: CVE-2019-19043.patch
-Patch0003: CVE-2019-19046.patch
-Patch0004: CVE-2019-19053.patch
-Patch0005: CVE-2019-19054.patch
-Patch0006: CVE-2019-19056.patch
-Patch0007: CVE-2019-19057.patch
-Patch0008: CVE-2019-19063.patch
-Patch0009: CVE-2019-19064.patch
-Patch0010: CVE-2019-19066.patch
-Patch0011: CVE-2019-19068.patch
-Patch0012: CVE-2019-19070.patch
-Patch0013: CVE-2019-19078.patch
+Patch001: CVE-2019-12379.patch
+Patch002: CVE-2019-19054.patch
 #cve.end
 
 #mainline: Mainline patches, upstream backport and fixes from 0051 to 0099
-Patch0051: 0051-Revert-iwlwifi-assign-directly-to-iwl_trans-cfg-in-Q.patch
-Patch0052: 0052-rcu-nocb-Fix-dump_tree-hierarchy-print-always-active.patch
+Patch0051: 0051-rcu-nocb-Fix-dump_tree-hierarchy-print-always-active.patch
+Patch0052: 0052-drm-i915-save-AUD_FREQ_CNTRL-state-at-audio-domain-s.patch
+Patch0053: 0053-drm-i915-Fix-audio-power-up-sequence-for-gen10-displ.patch
+Patch0054: 0054-drm-i915-extend-audio-CDCLK-2-BCLK-constraint-to-mor.patch
 #mainline.end
 
 #Serie.clr 01XX: Clear Linux patches
@@ -141,27 +132,18 @@ Requires:       linux-surface-license = %{version}-%{release}
 Linux kernel build files
 
 %prep
-%setup -q -n linux-5.4.6
+%setup -q -n linux-5.4.18
 
 #cve.patch.start cve patches
 %patch0001 -p1
 %patch0002 -p1
-%patch0003 -p1
-%patch0004 -p1
-%patch0005 -p1
-%patch0006 -p1
-%patch0007 -p1
-%patch0008 -p1
-%patch0009 -p1
-%patch0010 -p1
-%patch0011 -p1
-%patch0012 -p1
-%patch0013 -p1
 #cve.patch.end
 
 #mainline.patch.start Mainline patches, upstream backport and fixes
 %patch0051 -p1
 %patch0052 -p1
+%patch0053 -p1
+%patch0054 -p1
 #mainline.patch.end
 
 #Serie.patch.start Clear Linux patches
