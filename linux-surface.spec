@@ -14,7 +14,7 @@ Group:          kernel
 Source0:        https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.18.tar.xz
 Source1:        config
 Source2:        cmdline
-Source3:        https://github.com/linux-surface/linux-surface/commits/ffe19063f7c6469d4a625e72793e26a9f5ad3d5c
+Source10:       https://github.com/linux-surface/linux-surface/archive/ffe19063f7c6469d4a625e72793e26a9f5ad3d5c.tar.gz
 
 %define ktarget  surface
 %define kversion %{version}-%{release}.%{ktarget}
@@ -130,6 +130,14 @@ Requires:       linux-surface-license = %{version}-%{release}
 
 %description dev
 Linux kernel build files
+
+%package firmware
+License:        unknown
+Summary:        Intel IPTS firmware
+Group:          kernel
+
+%description firmware
+Firmware files for Intel IPTS used on Microsoft Surface devices.
 
 %prep
 %setup -q -n linux-5.4.18
@@ -293,6 +301,9 @@ createCPIO %{ktarget} %{kversion}
 
 rm -rf %{buildroot}/usr/lib/firmware
 
+tar -axf %{SOURCE10}
+cp -a linux-surface-ffe19063f7c6469d4a625e72793e26a9f5ad3d5c/firmware %{buildroot}/usr/lib
+
 mkdir -p %{buildroot}/usr/share/package-licenses/linux-surface
 cp COPYING %{buildroot}/usr/share/package-licenses/linux-surface/COPYING
 cp -a LICENSES/* %{buildroot}/usr/share/package-licenses/linux-surface
@@ -322,3 +333,8 @@ cp -a LICENSES/* %{buildroot}/usr/share/package-licenses/linux-surface
 %files dev
 %defattr(-,root,root)
 /usr/lib/modules/%{kversion}/build
+
+%files firmware
+%defattr(-,root,root)
+%dir /usr/lib/firmware/intel/ipts
+/usr/lib/firmware/intel/ipts
