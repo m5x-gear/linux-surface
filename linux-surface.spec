@@ -85,12 +85,12 @@ Patch1001: 1001-WireGuard-fast-modern-secure-kernel-VPN-tunnel.patch
 
 #surface.start 200X linux-surface patches
 Patch2001: 2001-ioremap_uc.patch
-Patch2002: 2002-hid.patch
-Patch2003: 2003-surface-acpi.patch
-Patch2004: 2004-surface3-power.patch
-Patch2005: 2005-surface-lte.patch
-Patch2006: 2006-wifi.patch
-Patch2007: 2007-surface3-spi-dma.patch
+Patch2002: 2002-surface-lte.patch
+Patch2003: 2003-surface-sam.patch
+Patch2004: 2004-surface3-oemb.patch
+Patch2005: 2005-surface3-power.patch
+Patch2006: 2006-surface3-spi.patch
+Patch2007: 2007-wifi.patch
 #surface.end
 
 %description
