@@ -1,7 +1,7 @@
-From f509c292838bf7823aa360cf8e45f0e89b9fe20d Mon Sep 17 00:00:00 2001
+From cdab476c49e26bfef7c1f8fab8f272406700fd7b Mon Sep 17 00:00:00 2001
 From: sebanc <22224731+sebanc@users.noreply.github.com>
 Date: Mon, 4 Nov 2019 09:30:57 +0100
-Subject: [PATCH 7/7] wifi
+Subject: [PATCH 6/7] wifi
 
 ---
  drivers/net/wireless/marvell/mwifiex/pcie.c   | 74 ++++++++++---------

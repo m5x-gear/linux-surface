@@ -5,13 +5,13 @@
 #
 
 Name:           linux-surface
-Version:        5.4.18
-Release:        902
+Version:        5.5.3
+Release:        908
 License:        GPL-2.0
 Summary:        The Linux kernel patched with linux-surface project patches
 Url:            https://github.com/linux-surface/linux-surface
 Group:          kernel
-Source0:        https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.18.tar.xz
+Source0:        https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.5.3.tar.xz
 Source1:        config
 Source2:        cmdline
 Source10:       https://github.com/linux-surface/linux-surface/archive/ffe19063f7c6469d4a625e72793e26a9f5ad3d5c.tar.gz
@@ -32,14 +32,10 @@ Requires: linux-surface-license = %{version}-%{release}
 
 #cve.start cve patches from 0001 to 050
 Patch001: CVE-2019-12379.patch
-Patch002: CVE-2019-19054.patch
 #cve.end
 
 #mainline: Mainline patches, upstream backport and fixes from 0051 to 0099
 Patch0051: 0051-rcu-nocb-Fix-dump_tree-hierarchy-print-always-active.patch
-Patch0052: 0052-drm-i915-save-AUD_FREQ_CNTRL-state-at-audio-domain-s.patch
-Patch0053: 0053-drm-i915-Fix-audio-power-up-sequence-for-gen10-displ.patch
-Patch0054: 0054-drm-i915-extend-audio-CDCLK-2-BCLK-constraint-to-mor.patch
 #mainline.end
 
 #Serie.clr 01XX: Clear Linux patches
@@ -72,19 +68,19 @@ Patch0126: 0126-print-CPU-that-faults.patch
 Patch0127: 0127-x86-microcode-Force-update-a-uCode-even-if-the-rev-i.patch
 Patch0128: 0128-x86-microcode-echo-2-reload-to-force-load-ucode.patch
 Patch0129: 0129-fix-bug-in-ucode-force-reload-revision-check.patch
-Patch0130: 0130-add-workaround-for-binutils-optimization.patch
-Patch0131: 0131-nvme-workaround.patch
+Patch0130: 0130-nvme-workaround.patch
+Patch0131: 0131-Don-t-report-an-error-if-PowerClamp-run-on-other-CPU.patch
 #Serie.end
 
 #Serie1.name WireGuard
-#Serie1.git  https://git.zx2c4.com/WireGuard
-#Serie1.cmt  edad0d6e99e5133b1e8e865d727a25fff6399cb4
-#Serie1.tag  0.0.20191219
+#Serie1.git  https://git.zx2c4.com/wireguard-linux-compat
+#Serie1.cmt  7a11a53c5a8cf54d1b4b12e2359d1dc4a2ebd751
+#Serie1.tag  v0.0.20200205
 Patch1001: 1001-WireGuard-fast-modern-secure-kernel-VPN-tunnel.patch
 #Serie1.end
 
 #surface.start 200X linux-surface patches
-Patch2001: 2001-ioremap_uc.patch
+Patch2001: 2001-ipts.patch
 Patch2002: 2002-surface-lte.patch
 Patch2003: 2003-surface-sam.patch
 Patch2004: 2004-surface3-oemb.patch
@@ -140,18 +136,14 @@ Group:          kernel
 Firmware files for Intel IPTS used on Microsoft Surface devices.
 
 %prep
-%setup -q -n linux-5.4.18
+%setup -q -n linux-5.5.3
 
 #cve.patch.start cve patches
 %patch0001 -p1
-%patch0002 -p1
 #cve.patch.end
 
 #mainline.patch.start Mainline patches, upstream backport and fixes
 %patch0051 -p1
-%patch0052 -p1
-%patch0053 -p1
-%patch0054 -p1
 #mainline.patch.end
 
 #Serie.patch.start Clear Linux patches

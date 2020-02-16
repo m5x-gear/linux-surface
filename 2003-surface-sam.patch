@@ -1,7 +1,7 @@
-From 30399aca12e933c6945ceb241882f80bb40a7931 Mon Sep 17 00:00:00 2001
+From c1b2e8d597323255dc65c1d5e1562b795ba3492c Mon Sep 17 00:00:00 2001
 From: qzed <qzed@users.noreply.github.com>
 Date: Mon, 26 Aug 2019 01:11:08 +0200
-Subject: [PATCH 5/7] surface-sam
+Subject: [PATCH 4/7] surface-sam
 
 ---
  drivers/acpi/acpica/dsopcode.c                |    2 +-
@@ -22,8 +22,7 @@ Subject: [PATCH 5/7] surface-sam
  .../x86/surface_sam/surface_sam_ssh.c         | 1773 +++++++++++++++++
  .../x86/surface_sam/surface_sam_ssh.h         |   97 +
  .../x86/surface_sam/surface_sam_vhf.c         |  276 +++
- drivers/tty/serdev/core.c                     |  111 +-
- 19 files changed, 7353 insertions(+), 16 deletions(-)
+ 18 files changed, 7254 insertions(+), 4 deletions(-)
  create mode 100644 drivers/platform/x86/surface_sam/Kconfig
  create mode 100644 drivers/platform/x86/surface_sam/Makefile
  create mode 100644 drivers/platform/x86/surface_sam/surface_sam_dtx.c
@@ -85,25 +84,25 @@ index d3d2dbfba680..0b7f617a6e9b 100644
  		buffer_desc = acpi_ut_create_buffer_object(buffer_length);
  		if (!buffer_desc) {
 diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
-index 348c795019fa..d25067a838a3 100644
+index 0e389c2e2101..4673aed07e98 100644
 --- a/drivers/platform/x86/Kconfig
 +++ b/drivers/platform/x86/Kconfig
-@@ -1342,6 +1342,7 @@ config PCENGINES_APU2
+@@ -1345,6 +1345,7 @@ config PCENGINES_APU2
  	  will be called pcengines-apuv2.
  
  source "drivers/platform/x86/intel_speed_select_if/Kconfig"
 +source "drivers/platform/x86/surface_sam/Kconfig"
  
- endif # X86_PLATFORM_DEVICES
- 
+ config SYSTEM76_ACPI
+ 	tristate "System76 ACPI Driver"
 diff --git a/drivers/platform/x86/Makefile b/drivers/platform/x86/Makefile
-index 6dd955ad9bf1..19b56f2181eb 100644
+index d707a8edd738..56ebd493b38f 100644
 --- a/drivers/platform/x86/Makefile
 +++ b/drivers/platform/x86/Makefile
-@@ -101,3 +101,4 @@ obj-$(CONFIG_I2C_MULTI_INSTANTIATE)	+= i2c-multi-instantiate.o
- obj-$(CONFIG_INTEL_ATOMISP2_PM)	+= intel_atomisp2_pm.o
+@@ -106,3 +106,4 @@ obj-$(CONFIG_INTEL_ATOMISP2_PM)	+= intel_atomisp2_pm.o
  obj-$(CONFIG_PCENGINES_APU2)	+= pcengines-apuv2.o
  obj-$(CONFIG_INTEL_SPEED_SELECT_INTERFACE) += intel_speed_select_if/
+ obj-$(CONFIG_SYSTEM76_ACPI)	+= system76_acpi.o
 +obj-$(CONFIG_SURFACE_SAM)	+= surface_sam/
 diff --git a/drivers/platform/x86/surface_sam/Kconfig b/drivers/platform/x86/surface_sam/Kconfig
 new file mode 100644
@@ -7431,161 +7430,6 @@ index 000000000000..0ed0ebbdb3cb
 +MODULE_AUTHOR("Maximilian Luz <luzmaximilian@gmail.com>");
 +MODULE_DESCRIPTION("Virtual HID Framework Driver for 5th Generation Surface Devices");
 +MODULE_LICENSE("GPL v2");
-diff --git a/drivers/tty/serdev/core.c b/drivers/tty/serdev/core.c
-index a9719858c950..ce5309d00280 100644
---- a/drivers/tty/serdev/core.c
-+++ b/drivers/tty/serdev/core.c
-@@ -552,16 +552,97 @@ static int of_serdev_register_devices(struct serdev_controller *ctrl)
- }
- 
- #ifdef CONFIG_ACPI
-+
-+#define SERDEV_ACPI_MAX_SCAN_DEPTH 32
-+
-+struct acpi_serdev_lookup {
-+	acpi_handle device_handle;
-+	acpi_handle controller_handle;
-+	int n;
-+	int index;
-+};
-+
-+static int acpi_serdev_parse_resource(struct acpi_resource *ares, void *data)
-+{
-+	struct acpi_serdev_lookup *lookup = data;
-+	struct acpi_resource_uart_serialbus *sb;
-+	acpi_status status;
-+
-+	if (ares->type != ACPI_RESOURCE_TYPE_SERIAL_BUS)
-+		return 1;
-+
-+	if (ares->data.common_serial_bus.type != ACPI_RESOURCE_SERIAL_TYPE_UART)
-+		return 1;
-+
-+	if (lookup->index != -1 && lookup->n++ != lookup->index)
-+		return 1;
-+
-+	sb = &ares->data.uart_serial_bus;
-+
-+	status = acpi_get_handle(lookup->device_handle,
-+				 sb->resource_source.string_ptr,
-+				 &lookup->controller_handle);
-+	if (ACPI_FAILURE(status))
-+		return 1;
-+
-+	/*
-+	 * NOTE: Ideally, we would also want to retreive other properties here,
-+	 * once setting them before opening the device is supported by serdev.
-+	 */
-+
-+	return 1;
-+}
-+
-+static int acpi_serdev_do_lookup(struct acpi_device *adev,
-+                                 struct acpi_serdev_lookup *lookup)
-+{
-+	struct list_head resource_list;
-+	int ret;
-+
-+	lookup->device_handle = acpi_device_handle(adev);
-+	lookup->controller_handle = NULL;
-+	lookup->n = 0;
-+
-+	INIT_LIST_HEAD(&resource_list);
-+	ret = acpi_dev_get_resources(adev, &resource_list,
-+				     acpi_serdev_parse_resource, lookup);
-+	acpi_dev_free_resource_list(&resource_list);
-+
-+	if (ret < 0)
-+		return -EINVAL;
-+
-+	return 0;
-+}
-+
-+static int acpi_serdev_check_resources(struct serdev_controller *ctrl,
-+				       struct acpi_device *adev)
-+{
-+	struct acpi_serdev_lookup lookup;
-+	int ret;
-+
-+	if (acpi_bus_get_status(adev) || !adev->status.present)
-+		return -EINVAL;
-+
-+	/* Look for UARTSerialBusV2 resource */
-+	lookup.index = -1;	// we only care for the last device
-+
-+	ret = acpi_serdev_do_lookup(adev, &lookup);
-+	if (ret)
-+		return ret;
-+
-+	/* Make sure controller and ResourceSource handle match */
-+	if (ACPI_HANDLE(ctrl->dev.parent) != lookup.controller_handle)
-+		return -ENODEV;
-+
-+	return 0;
-+}
-+
- static acpi_status acpi_serdev_register_device(struct serdev_controller *ctrl,
--					    struct acpi_device *adev)
-+					       struct acpi_device *adev)
- {
--	struct serdev_device *serdev = NULL;
-+	struct serdev_device *serdev;
- 	int err;
- 
--	if (acpi_bus_get_status(adev) || !adev->status.present ||
--	    acpi_device_enumerated(adev))
--		return AE_OK;
--
- 	serdev = serdev_device_alloc(ctrl);
- 	if (!serdev) {
- 		dev_err(&ctrl->dev, "failed to allocate serdev device for %s\n",
-@@ -589,7 +670,7 @@ static const struct acpi_device_id serdev_acpi_devices_blacklist[] = {
- };
- 
- static acpi_status acpi_serdev_add_device(acpi_handle handle, u32 level,
--				       void *data, void **return_value)
-+					  void *data, void **return_value)
- {
- 	struct serdev_controller *ctrl = data;
- 	struct acpi_device *adev;
-@@ -597,26 +678,32 @@ static acpi_status acpi_serdev_add_device(acpi_handle handle, u32 level,
- 	if (acpi_bus_get_device(handle, &adev))
- 		return AE_OK;
- 
-+	if (acpi_device_enumerated(adev))
-+		return AE_OK;
-+
- 	/* Skip if black listed */
- 	if (!acpi_match_device_ids(adev, serdev_acpi_devices_blacklist))
- 		return AE_OK;
- 
-+	if (acpi_serdev_check_resources(ctrl, adev))
-+		return AE_OK;
-+
- 	return acpi_serdev_register_device(ctrl, adev);
- }
- 
-+
- static int acpi_serdev_register_devices(struct serdev_controller *ctrl)
- {
- 	acpi_status status;
--	acpi_handle handle;
- 
--	handle = ACPI_HANDLE(ctrl->dev.parent);
--	if (!handle)
-+	if (!has_acpi_companion(ctrl->dev.parent))
- 		return -ENODEV;
- 
--	status = acpi_walk_namespace(ACPI_TYPE_DEVICE, handle, 1,
-+	status = acpi_walk_namespace(ACPI_TYPE_DEVICE, ACPI_ROOT_OBJECT,
-+				     SERDEV_ACPI_MAX_SCAN_DEPTH,
- 				     acpi_serdev_add_device, NULL, ctrl, NULL);
- 	if (ACPI_FAILURE(status))
--		dev_dbg(&ctrl->dev, "failed to enumerate serdev slaves\n");
-+		dev_warn(&ctrl->dev, "failed to enumerate serdev slaves\n");
- 
- 	if (!ctrl->serdev)
- 		return -ENODEV;
 -- 
 2.25.0
 
